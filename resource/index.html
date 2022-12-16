@@ -33,8 +33,8 @@
         <button type="submit" class="btn btn-default">Submit</button>
     </form>
 
-    <audio controls autoplay hidden>
-        <source src="/resource/example.wav" type="audio/wav">
+    <audio controls autoplay hidden id="player">
+        <source id="audi_src" src="/resource/example.wav" type="audio/wav">
     </audio>
 </div>
 </body>
@@ -52,7 +52,15 @@ $( "#tts_form" ).submit(function( event ) {
     data: {input: txt},
     timeout: 100000,
     success: function(data) {
-         alert(data);
+         console.log(data);
+         var audio = $("#player");
+        $("#audi_src").attr("src", data);
+        audio[0].pause();
+        audio[0].load();//suspends and restores all audio element
+
+        //audio[0].play(); changed based on Sprachprofi's comment below
+        audio[0].oncanplaythrough = audio[0].play();
+        audio.show();
     },
     error: function(jqXHR, textStatus, errorThrown) {
         console.log(errorThrown)
