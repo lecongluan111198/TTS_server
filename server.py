@@ -36,4 +36,4 @@ class Server(BaseHTTPRequestHandler):
         file = Tacotron2().to_wave_form(form.getvalue("input").strip())
         self.send_response(200)
         self.end_headers()
-        self.wfile.write(bytes(file))
+        self.wfile.write(bytes(file, encoding='utf-8'))
