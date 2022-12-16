@@ -34,4 +34,6 @@ class Server(BaseHTTPRequestHandler):
             environ={'REQUEST_METHOD': 'POST'}
         )
         file = Tacotron2().to_wave_form(form.getvalue("input").strip())
-        self.send_response(200, file)
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(bytes(file))
