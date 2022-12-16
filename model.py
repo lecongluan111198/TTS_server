@@ -22,5 +22,6 @@ class Tacotron2:
     def to_wave_form(self, text):
         mel_spec = self.text_to_spec(text)
         wave = self.spec_to_wave_form(mel_spec)
-        torchaudio.save(f'resource/{current_milli_time()}.wav', wave.squeeze(1), 22050)
-        return f'{current_milli_time()}.wav'
+        file = f'resource/{current_milli_time()}.wav'
+        torchaudio.save(file, wave.squeeze(1), 22050)
+        return file

@@ -46,15 +46,17 @@ $( "#tts_form" ).submit(function( event ) {
     event.preventDefault();
     var txt = $("#text").val();
     console.log(txt.trim())
-<!--  // Send the data using post-->
-  var posting = $.post( "/submit", { input: txt } );
-
-<!--  // Put the results in a div-->
-  posting.done(function( data ) {
-    alert(data);
-<!--    var content = $( data ).find( "#content" );-->
-<!--    $( "#result" ).empty().append( content );-->
-  });
+  $.ajax({
+    type: "POST",
+    url: "/submit",
+    data: {input: txt},
+    timeout: 100000,
+    success: function(data) {
+         alert(data);
+    },
+    error: function(jqXHR, textStatus, errorThrown) {
+        console.log(errorThrown)
+    }});
 });
 
 </script>
