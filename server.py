@@ -14,7 +14,13 @@ class Server(BaseHTTPRequestHandler):
                 self.send_response(200)
                 self.end_headers()
                 self.wfile.write(bytes(f, 'utf-8'))
-            elif self.path.startswith("/resource") and "." not in self.path:
+            elif self.path == '/resource/main.css':
+                print(self.path[1:])
+                f = open(self.path[1:]).read()
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(bytes(f, 'utf-8'))
+            elif self.path.startswith("/resource") and "./" not in self.path:
                 print(self.path[1:])
                 f = open(self.path[1:], 'rb')
                 self.send_response(200)
@@ -36,4 +42,4 @@ class Server(BaseHTTPRequestHandler):
         file = Tacotron2().to_wave_form(form.getvalue("input").strip())
         self.send_response(200)
         self.end_headers()
-        self.wfile.write(bytes(file, encoding='utf-8'))
+        self.wfile.write(bytes("/" + file, encoding='utf-8'))

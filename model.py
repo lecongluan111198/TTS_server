@@ -1,5 +1,6 @@
 import torchaudio
 import time
+from pydub import AudioSegment
 from speechbrain.pretrained import Tacotron2
 from speechbrain.pretrained import HIFIGAN
 
@@ -24,4 +25,5 @@ class Tacotron2:
         wave = self.spec_to_wave_form(mel_spec)
         file = f'resource/{current_milli_time()}.wav'
         torchaudio.save(file, wave.squeeze(1), 22050)
-        return file
+        AudioSegment.from_wav(file).export(file.replace("wav", "mp3"), format="mp3")
+        return file.replace("wav", "mp3")

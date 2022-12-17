@@ -19,6 +19,21 @@
             integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
             crossorigin="anonymous"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <style>
+        .loader {
+          border: 5px solid #f3f3f3; /* Light grey */
+          border-top: 5px solid #3498db; /* Blue */
+          border-radius: 50%;
+          width: 35px;
+          height: 35px;
+          animation: spin 2s linear infinite;
+        }
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+
+    </style>
 </head>
 <body>
 <div class="container">
@@ -32,9 +47,10 @@
         </div>
         <button type="submit" class="btn btn-default">Submit</button>
     </form>
-
+    <div hidden id="loading" class="loader"></div>
+    <p id="error" style="color: red;"></p>
     <audio controls autoplay hidden id="player">
-        <source id="audi_src" src="/resource/example.wav" type="audio/wav">
+        <source id="audi_src" src="/resource/example.wav" type="audio/mp3">
     </audio>
 </div>
 </body>
@@ -46,6 +62,8 @@ $( "#tts_form" ).submit(function( event ) {
     event.preventDefault();
     var txt = $("#text").val();
     console.log(txt.trim())
+    $("#loading").show();
+    $("#error").text('')
   $.ajax({
     type: "POST",
     url: "/submit",
@@ -57,14 +75,17 @@ $( "#tts_form" ).submit(function( event ) {
         $("#audi_src").attr("src", data);
         audio[0].pause();
         audio[0].load();//suspends and restores all audio element
-
+        $("#loading").hide();
         //audio[0].play(); changed based on Sprachprofi's comment below
         audio[0].oncanplaythrough = audio[0].play();
         audio.show();
     },
     error: function(jqXHR, textStatus, errorThrown) {
         console.log(errorThrown)
+        $("#error").text("fail")
+        $("#loading").hide();
     }});
 });
+
 
 </script>
