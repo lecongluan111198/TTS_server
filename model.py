@@ -8,6 +8,7 @@ from speechbrain.pretrained import HIFIGAN
 def current_milli_time():
     return round(time.time() * 1000)
 
+
 class Tacotron2:
     tacotron2 = Tacotron2.from_hparams(source="speechbrain/tts-tacotron2-ljspeech", savedir="tmpdir_tts")
     hifi_gan = HIFIGAN.from_hparams(source="speechbrain/tts-hifigan-ljspeech", savedir="tmpdir_vocoder")
@@ -20,10 +21,10 @@ class Tacotron2:
         waveforms = Tacotron2.hifi_gan.decode_batch(mel_spec)
         return waveforms
 
-    def to_wave_form(self, text):
+    def to_wave_form(self, text, index=0):
         mel_spec = self.text_to_spec(text)
         wave = self.spec_to_wave_form(mel_spec)
-        file = f'resource/{current_milli_time()}.wav'
+        file = f'resource/{index}_{current_milli_time()}.wav'
         torchaudio.save(file, wave.squeeze(1), 22050)
         AudioSegment.from_wav(file).export(file.replace("wav", "mp3"), format="mp3")
         return file.replace("wav", "mp3")

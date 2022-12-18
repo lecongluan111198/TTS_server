@@ -39,11 +39,15 @@
 <div class="container">
     <h2>Text to speech</h2>
     <form id="tts_form" action="#">
-        <div class="form-group">
-            <label for="text">Input:</label>
-            <textarea id="text" name="text_input" rows="4" style="width:100%">
-                At w3schools.com you will learn how to make a website. They offer free tutorials in all web development technologies.
-            </textarea>
+<!--        <div class="form-group">-->
+<!--            <label for="text">Input:</label>-->
+<!--            <textarea id="text" name="text_input" rows="4" style="width:100%">-->
+<!--                At w3schools.com you will learn how to make a website. They offer free tutorials in all web development technologies.-->
+<!--            </textarea>-->
+<!--        </div>-->
+        <div class="mb-3">
+          <label for="formFile" class="form-label">Story</label>
+          <input class="form-control" type="file" name="file" id="formFile">
         </div>
         <button type="submit" class="btn btn-default">Submit</button>
     </form>
@@ -52,6 +56,24 @@
     <audio controls autoplay hidden id="player">
         <source id="audi_src" src="/resource/example.wav" type="audio/mp3">
     </audio>
+
+     <table class="table" id="result">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">sentence</th>
+          <th scope="col">Audio</th>
+        </tr>
+      </thead>
+      <tbody>
+<!--        <tr>-->
+<!--          <th scope="row">1</th>-->
+<!--          <td>Mark</td>-->
+<!--          <td>Otto</td>-->
+<!--          <td>@mdo</td>-->
+<!--        </tr>-->
+      </tbody>
+    </table>
 </div>
 </body>
 </html>
@@ -59,32 +81,36 @@
 <script>
 
 $( "#tts_form" ).submit(function( event ) {
+    var data = new FormData($("#tts_form")[0]);
+    console.log(data)
     event.preventDefault();
-    var txt = $("#text").val();
-    console.log(txt.trim())
     $("#loading").show();
     $("#error").text('')
-  $.ajax({
-    type: "POST",
-    url: "/submit",
-    data: {input: txt},
-    timeout: 100000,
-    success: function(data) {
-         console.log(data);
-         var audio = $("#player");
-        $("#audi_src").attr("src", data);
-        audio[0].pause();
-        audio[0].load();//suspends and restores all audio element
-        $("#loading").hide();
-        //audio[0].play(); changed based on Sprachprofi's comment below
-        audio[0].oncanplaythrough = audio[0].play();
-        audio.show();
-    },
-    error: function(jqXHR, textStatus, errorThrown) {
-        console.log(errorThrown)
-        $("#error").text("fail")
-        $("#loading").hide();
-    }});
+    $.ajax({
+        type: "POST",
+        enctype: 'multipart/form-data',
+        processData: false,  // Important!
+        contentType: false,
+        cache: false,
+        url: "/file/submit",
+        data: data,
+        timeout: 100000,
+        success: function(data) {
+            console.log(data);
+            $("#loading").hide();
+            $('#result > tbody').empty()
+            rows = JSON.parse(data)
+            for (i in rows) {
+                row = rows[i];
+                console.log(row)
+                $('#result > tbody:last-child').append('<tr> <th scope="row">'+ i +'</th> <td>'+ row['sentence'] +'</td> <td><audio controls><source src="'+ row['src'] +'" type="audio/mp3"></audio></td></tr>');
+            }
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            console.log(errorThrown)
+            $("#error").text("fail")
+            $("#loading").hide();
+        }});
 });
 
 

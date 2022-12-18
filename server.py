@@ -1,7 +1,8 @@
 from http.server import BaseHTTPRequestHandler
 from model import Tacotron2
 import cgi
-
+from utils import executor
+import json
 
 class Server(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -34,12 +35,34 @@ class Server(BaseHTTPRequestHandler):
             self.send_error(404, f)
 
     def do_POST(self):
-        form = cgi.FieldStorage(
-            fp=self.rfile,
-            headers=self.headers,
-            environ={'REQUEST_METHOD': 'POST'}
-        )
-        file = Tacotron2().to_wave_form(form.getvalue("input").strip())
-        self.send_response(200)
-        self.end_headers()
-        self.wfile.write(bytes("/" + file, encoding='utf-8'))
+        if self.path == '/submit':
+            form = cgi.FieldStorage(
+                fp=self.rfile,
+                headers=self.headers,
+                environ={'REQUEST_METHOD': 'POST'}
+            )
+            file = Tacotron2().to_wave_form(form.getvalue("input").strip())
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(bytes("/" + file, encoding='utf-8'))
+        elif self.path == '/file/submit':
+            print("submit")
+            form = cgi.FieldStorage(
+                fp=self.rfile,
+                headers=self.headers,
+                environ={'REQUEST_METHOD': 'POST'}
+            )
+            filename = form['file'].filename
+            data = form['file'].file.read()
+            lines = data.decode("utf-8").split("\n")
+            print(len(lines))
+            ret = [""] * len(lines)
+            for i, line in enumerate(lines):
+                f = executor.submit(Tacotron2().to_wave_form(line.strip()))
+                src = f.result()
+                ret[i] = {"src": src, "sentence": line}
+            self.send_response(200)
+            self.end_headers()
+            print(ret)
+            # self.send_response(200, ret)
+            self.wfile.write(bytes(json.dumps(ret), encoding='utf-8'))
