@@ -58,7 +58,7 @@ class Server(BaseHTTPRequestHandler):
             print(len(lines))
             ret = [""] * len(lines)
             for i, l in enumerate(lines):
-                f = executor.submit(Tacotron2().to_wave_form(l.strip()))
+                f = executor.submit(Tacotron2().to_wave_form(l.strip(), i))
                 src = f.result()
                 ret[i] = {"src": src, "sentence": l}
             self.send_response(200)
