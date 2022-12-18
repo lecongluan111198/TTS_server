@@ -57,10 +57,10 @@ class Server(BaseHTTPRequestHandler):
             lines = data.decode("utf-8").split("\n")
             print(len(lines))
             ret = [""] * len(lines)
-            for i, line in enumerate(lines):
-                f = executor.submit(Tacotron2().to_wave_form(line.strip()))
+            for i, l in enumerate(lines):
+                f = executor.submit(Tacotron2().to_wave_form(l.strip()))
                 src = f.result()
-                ret[i] = {"src": src, "sentence": line}
+                ret[i] = {"src": src, "sentence": l}
             self.send_response(200)
             self.end_headers()
             print(ret)
