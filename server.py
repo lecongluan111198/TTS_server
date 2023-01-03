@@ -1,5 +1,5 @@
 from http.server import BaseHTTPRequestHandler
-from model import Tacotron2
+from model import tts_model, to_wave_form_with_multi_texts
 import cgi
 from utils import executor
 import json
@@ -41,7 +41,7 @@ class Server(BaseHTTPRequestHandler):
                 headers=self.headers,
                 environ={'REQUEST_METHOD': 'POST'}
             )
-            file = Tacotron2().to_wave_form(form.getvalue("input").strip())
+            file, _ = tts_model.to_wave_form(form.getvalue("input").strip())
             self.send_response(200)
             self.end_headers()
             self.wfile.write(bytes("/" + file, encoding='utf-8'))
@@ -56,12 +56,11 @@ class Server(BaseHTTPRequestHandler):
             data = form['file'].file.read()
             lines = data.decode("utf-8").split("\n")
             print(len(lines))
-            ret = [""] * len(lines)
-            for i, l in enumerate(lines):
-                # f = executor.submit(Tacotron2().to_wave_form(l.strip(), i))
-                # source = f.result()
-                source = Tacotron2().to_wave_form(l.strip(), i)
-                ret[i] = {"src": source, "sentence": l}
+            ret = to_wave_form_with_multi_texts(lines)
+            # ret = [""] * len(lines)
+            # for i, l in enumerate(lines):
+            #     source, _ = Tacotron2().to_wave_form(l.strip(), i)
+            #     ret[i] = {"src": source, "sentence": l}
             self.send_response(200)
             self.end_headers()
             print(ret)

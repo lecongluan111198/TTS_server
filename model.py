@@ -3,11 +3,25 @@ import time
 from pydub import AudioSegment
 from speechbrain.pretrained import Tacotron2
 from speechbrain.pretrained import HIFIGAN
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
+executor = ThreadPoolExecutor(5)
+tts_model = Tacotron2()
 
 def current_milli_time():
     return round(time.time() * 1000)
 
+def to_wave_form_with_multi_texts(texts):
+    ret = [""] * len(texts)
+    futures = {executor.submit(tts_model.to_wave_form, text.strip(), i):  (i, text) for i, text in enumerate(texts)}
+    for future in as_completed(futures):
+        text, _ = futures[future]
+        try:
+            source, i = future.result()
+            ret[i] = {"src": source, "sentence": text}
+        except Exception as exc:
+            print('%r generated an exception: %s' % (text, exc))
+    return ret
 
 class Tacotron2:
     tacotron2 = Tacotron2.from_hparams(source="speechbrain/tts-tacotron2-ljspeech", savedir="tmpdir_tts")
@@ -27,4 +41,6 @@ class Tacotron2:
         file = f'resource/{index}_{current_milli_time()}.wav'
         torchaudio.save(file, wave.squeeze(1), 22050)
         AudioSegment.from_wav(file).export(file.replace("wav", "mp3"), format="mp3")
-        return file.replace("wav", "mp3")
+        return file.replace("wav", "mp3"), index
+    
+
