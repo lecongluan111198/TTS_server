@@ -35,10 +35,10 @@ def to_wave_form_with_multi_texts(texts):
     ret = [""] * len(texts)
     futures = {executor.submit(tts_model.to_wave_form, text.strip(), i):  (i, text) for i, text in enumerate(texts)}
     for future in as_completed(futures):
-        text, _ = futures[future]
+        text1, text2 = futures[future]
         try:
             source, i = future.result()
-            ret[i] = {"src": source, "sentence": text}
+            ret[i] = {"src": source, "sentence": text2}
         except Exception as exc:
             print('%r generated an exception: %s' % (text, exc))
     return ret
