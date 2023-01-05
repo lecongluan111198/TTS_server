@@ -1,5 +1,6 @@
 import torchaudio
 import time
+import datetime
 from pydub import AudioSegment
 from speechbrain.pretrained import Tacotron2
 from speechbrain.pretrained import HIFIGAN
@@ -18,14 +19,20 @@ class Tacotron2:
         return waveforms
 
     def to_wave_form(self, text, index=0):
+        start = datetime.datetime.now()
         mel_spec = self.text_to_spec(text)
+        last = datetime.datetime.now()
+        print(f'{index}-text_to_spec: {(last - start).seconds()}')
+        start = last
         wave = self.spec_to_wave_form(mel_spec)
+        last = datetime.datetime.now()
+        print(f'{index}-spec_to_wave_form: {(last - start).seconds()}')
         file = f'resource/{index}_{current_milli_time()}.wav'
         torchaudio.save(file, wave.squeeze(1), 22050)
         AudioSegment.from_wav(file).export(file.replace("wav", "mp3"), format="mp3")
         return file.replace("wav", "mp3"), index
 
-executor = ThreadPoolExecutor(5)
+executor = ThreadPoolExecutor(10)
 tts_model = Tacotron2()
 
 def current_milli_time():
@@ -40,7 +47,7 @@ def to_wave_form_with_multi_texts(texts):
             source, i = future.result()
             ret[i] = {"src": source, "sentence": text2}
         except Exception as exc:
-            print('%r generated an exception: %s' % (text, exc))
+            print('%r generated an exception: %s' % (text2, exc))
     return ret
 
     
