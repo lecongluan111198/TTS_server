@@ -22,11 +22,11 @@ class Tacotron2:
         start = datetime.datetime.now()
         mel_spec = self.text_to_spec(text)
         last = datetime.datetime.now()
-        print(f'{index}-text_to_spec: {(last - start).seconds()}')
+        print(f'{index}-text_to_spec: {(last - start).total_seconds()}')
         start = last
         wave = self.spec_to_wave_form(mel_spec)
         last = datetime.datetime.now()
-        print(f'{index}-spec_to_wave_form: {(last - start).seconds()}')
+        print(f'{index}-spec_to_wave_form: {(last - start).total_seconds()}')
         file = f'resource/{index}_{current_milli_time()}.wav'
         torchaudio.save(file, wave.squeeze(1), 22050)
         AudioSegment.from_wav(file).export(file.replace("wav", "mp3"), format="mp3")
